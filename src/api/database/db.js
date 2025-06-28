@@ -6,8 +6,9 @@ import enviroments from "../config/enviroments.js";
 
 const { database } = enviroments; // Desestructura la database de enviroments
 
-const connection = mysql.createPool({
+const connection = mysql.createPool({ //funcion que crea un conjunto de conexiones. 
     host: database.host,
+    port: 3000, // Puerto de MySQL en XAMPP
     database: database.name,
     user: database.user,
     password: database.password
