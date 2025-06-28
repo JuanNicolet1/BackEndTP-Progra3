@@ -1,15 +1,18 @@
 import express from "express";
 import enviroments from "./src/api/config/enviroments.js"; //exportaciones necesarias
 import connection from "./src/api/database/db.js";  //exportacion de la base de datos para la conexion.
+import cors from "cors";
 
 const PORT = enviroments.port;
 const app = express();
 
 // Middlewares necesarios
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware para CORS
+/*
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -20,26 +23,27 @@ app.use((req, res, next) => {
         next();
     }
 });
+*/
 
 app.get("/", (req, res) => {  //default
-    res.send("Hola Valentin");
+    res.send("Hola Mundo");
 })
 
 //1// GET - Traer todos los productos:
 app.get("/producto", async (req, res) => {
     try {
-        let sql = `SELECT * FROM producto`;
+        let sql = `SELECT * FROM producto`; // Crea la sentencia sql
         const [rows] = await connection.query(sql);
 
         console.log(rows); // <-- Esto imprime los productos en la consola
 
-        res.status(200).json({
+        res.status(200).json({ // status 200 quiere decir que salió todo bien
             payload: rows,
             message: rows.length === 0 ? 'No se encontraron productos': 'Productos encontrados'
         });
     } catch(error) {
         console.error("Error obteniendo los productos", error);
-        res.status(500).json({
+        res.status(500).json({ // status 500 es un error del servidor
             error: "Error interno del servidor al obtener productos",
             details: error.message
         });
@@ -50,7 +54,7 @@ app.get("/producto", async (req, res) => {
 app.get("/producto/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        let sql = `SELECT * FROM producto WHERE id = ?`;
+        let sql = `SELECT * FROM producto WHERE id_producto = ?`;
         const [rows] = await connection.query(sql, [id]);
 
         if (rows.length > 0) {
@@ -84,11 +88,11 @@ app.post("/producto", async (req, res) => {
             });
         }
 
-        let sql = `INSERT INTO producto (nombre, descripcion, precio, stock) VALUES (?, ?, ?, ?)`;
-        const [result] = await connection.query(sql, [nombre, descripcion, precio, stock]);
+        let sql = `INSERT INTO producto (Nombre, Precio, Tipo) VALUES (?, ?, ?)`;
+        const [result] = await connection.query(sql, [nombre, precio, tipo]);
 
         // Obtener el producto creado
-        const [productoCreado] = await connection.query(`SELECT * FROM producto WHERE id = ?`, [result.insertId]);
+        const [productoCreado] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [result.insertId]);
 
         res.status(201).json({
             payload: productoCreado[0],
@@ -110,7 +114,7 @@ app.put("/producto/:id", async (req, res) => {
         const { nombre, descripcion, precio, stock } = req.body;
         
         // Validar que el producto existe
-        const [productoExistente] = await connection.query(`SELECT * FROM producto WHERE id = ?`, [id]);
+        const [productoExistente] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [id]);
         
         if (productoExistente.length === 0) {
             return res.status(404).json({
@@ -118,11 +122,11 @@ app.put("/producto/:id", async (req, res) => {
             });
         }
 
-        let sql = `UPDATE producto SET nombre = ?, descripcion = ?, precio = ?, stock = ? WHERE id = ?`;
-        await connection.query(sql, [nombre, descripcion, precio, stock, id]);
+        let sql = `UPDATE producto SET Nombre = ?, Precio = ?, Tipo = ? WHERE id_producto = ?`;
+        await connection.query(sql, [nombre, precio, tipo]);
 
         // Obtener el producto actualizado
-        const [productoActualizado] = await connection.query(`SELECT * FROM producto WHERE id = ?`, [id]);
+        const [productoActualizado] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [id]);
 
         res.status(200).json({
             payload: productoActualizado[0],
@@ -143,7 +147,7 @@ app.delete("/producto/:id", async (req, res) => {
         const { id } = req.params;
         
         // Validar que el producto existe
-        const [productoExistente] = await connection.query(`SELECT * FROM producto WHERE id = ?`, [id]);
+        const [productoExistente] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [id]);
         
         if (productoExistente.length === 0) {
             return res.status(404).json({
@@ -151,7 +155,7 @@ app.delete("/producto/:id", async (req, res) => {
             });
         }
 
-        let sql = `DELETE FROM producto WHERE id = ?`;
+        let sql = `DELETE FROM producto WHERE id_producto = ?`;
         await connection.query(sql, [id]);
 
         res.status(200).json({
