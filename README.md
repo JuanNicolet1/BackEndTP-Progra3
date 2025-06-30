@@ -8,3 +8,5 @@ MySQL (XAMPP): Puerto 3000
 Tu servidor Node.js: Puerto 3002
 phpMyAdmin: http://localhost/phpmyadmin
 Tu API: http://localhost:3002
+
+#VALENTIN PAGURA: DESCOMENTAR LINEAS EN DB REFERIDAS AL PUERTO 3000 PARA PROBAR BD.
