@@ -4,7 +4,7 @@ import cors from "cors";
 import { productRoutes } from "./src/api/routes/index_barril.js";
 import { loggerUrl } from "./src/api/middlewares/middlewares.js";
 
-const PORT = environments.port;
+const PORT = 3002;
 const app = express();
 
 // MIDDLEWARES
@@ -17,5 +17,5 @@ app.use(loggerUrl);
 app.use("/products", productRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT || 3000}`);
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
