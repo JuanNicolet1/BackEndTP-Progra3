@@ -11,6 +11,12 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
+// Hace console.log de lo que haga (si hago un get, da GET/producto)
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+})
+
 // Middleware para CORS
 /*
 app.use((req, res, next) => {
@@ -79,17 +85,17 @@ app.get("/producto/:id", async (req, res) => {
 //3// POST - Crear nuevo producto:
 app.post("/producto", async (req, res) => {
     try {
-        const { nombre, descripcion, precio, stock } = req.body;
+        const { name, price, category, image } = req.body;
         
         // Validar datos requeridos
-        if (!nombre || !precio) {
+        if (!name || !price) {
             return res.status(400).json({
                 error: "Nombre y precio son obligatorios"
             });
         }
 
-        let sql = `INSERT INTO producto (Nombre, Precio, Tipo) VALUES (?, ?, ?)`;
-        const [result] = await connection.query(sql, [nombre, precio, tipo]);
+        let sql = `INSERT INTO producto (name, price, category, image) VALUES (?, ?, ?, ?)`;
+        const [result] = await connection.query(sql, [name, price, category, image]);
 
         // Obtener el producto creado
         const [productoCreado] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [result.insertId]);
@@ -108,35 +114,38 @@ app.post("/producto", async (req, res) => {
 });
 
 //4// PUT - Actualizar producto:
-app.put("/producto/:id", async (req, res) => {
+app.put("/producto", async (req, res) => {
     try {
-        const { id } = req.params;
-        const { nombre, descripcion, precio, stock } = req.body;
-        
-        // Validar que el producto existe
-        const [productoExistente] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [id]);
-        
-        if (productoExistente.length === 0) {
-            return res.status(404).json({
-                error: `No se encontró producto con ID ${id}`
-            });
+        let { id_producto, name, price, category, image } = req.body;
+
+        if(!id_producto || !name || !price || !category || !image){
+            return res.status(400).json({
+                error: "Faltan campos obligatorios"
+           })
         }
 
-        let sql = `UPDATE producto SET Nombre = ?, Precio = ?, Tipo = ? WHERE id_producto = ?`;
-        await connection.query(sql, [nombre, precio, tipo]);
+        let sql = `
+        UPDATE producto
+        SET name = ?, price = ?, category = ?, image = ?
+        WHERE id_producto = ?
+        `;
 
-        // Obtener el producto actualizado
-        const [productoActualizado] = await connection.query(`SELECT * FROM producto WHERE id_producto = ?`, [id]);
+        let [result] = await connection.query(sql, [name, price, category, image, id_producto]);
+
+        if(result.affectedRows === 0) {
+            return res.status(400).json({
+                message: "No se actualizó el producto"
+            })
+        }
 
         res.status(200).json({
-            payload: productoActualizado[0],
-            message: 'Producto actualizado exitosamente'
+            message: "Producto actualizado"
         });
-    } catch(error) {
+
+     } catch(error) {
         console.error("Error actualizando el producto", error);
         res.status(500).json({
             error: "Error interno del servidor al actualizar producto",
-            details: error.message
         });
     }
 });
@@ -156,8 +165,14 @@ app.delete("/producto/:id", async (req, res) => {
         }
 
         let sql = `DELETE FROM producto WHERE id_producto = ?`;
-        await connection.query(sql, [id]);
+        let [result] = await connection.query(sql, [id]);
 
+        if(result.affectedRows === 0) {
+            return res.status(400).json({
+                message: "No se actualizó el producto"
+            })
+        }
+        
         res.status(200).json({
             message: 'Producto eliminado exitosamente',
             payload: productoExistente[0]
