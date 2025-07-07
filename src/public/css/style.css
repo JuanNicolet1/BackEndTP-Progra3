@@ -1,0 +1,57 @@
+h2 {
+    display: flex;
+    justify-content: center;
+}
+
+header{
+    display: flex;
+    justify-content: center;
+}
+
+#opciones{
+    display: flex;
+    justify-content: space-around;
+    border: 2px black solid;
+    width: 50%;
+}
+
+h1{
+    display: flex;
+    justify-content: center;
+}
+
+hr{
+    width: 53%;
+}
+
+.productos-listado {
+    display: flex;
+}
+
+.listado_mostrar {
+  display: flex;
+  align-items: center;
+  margin-left: 250px;
+  margin-right: 250px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  gap: 15px;
+}
+
+.listado_mostrar img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+#updateProducts-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+form input,
+form select{
+    width: 150px;
+}

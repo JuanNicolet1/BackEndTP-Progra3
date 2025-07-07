@@ -1,0 +1,21 @@
+<%-include("partials/head") %>
+<%-include("partials/nav") %>
+    <h2><%= title %></h2>
+<%-include("partials/footer") %>
+<main class="contenedor-get">
+        <div class="producto-container">
+           <ul id="lista-productos">
+              <% products.forEach(prod => { %>
+                <li class="listado_mostrar">
+                    <img src="<%= prod.image %>" alt="">
+                    <p>Nombre: <%= prod.name %> / Precio: <%= prod.price %>/</p>
+                </li>
+              <% }) %>
+           </ul>
+        </div>
+    </main>
+
+    <script>
+    
+    </script>
+</html>

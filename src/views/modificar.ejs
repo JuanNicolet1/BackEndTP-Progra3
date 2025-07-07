@@ -1,0 +1,164 @@
+<%-include("partials/head") %>
+<%-include("partials/nav") %>
+    <h2><%= title %></h2>
+
+    <main id="contenedor-get">
+        <div>
+            <h2>Consultar producto</h2>
+            <form action="" id="getProduct-form">
+                <label for="idProd">Id producto</label>
+                <input type="number" name="idProd" id="idProd" placeholder="Escribe el id">
+                <input type="submit" value="Consultar">
+            </form>
+        </div>
+
+        <div id="getId-container">
+            <ul id="lista-getId"></ul>
+        </div>
+
+        <div id="updateForm-container"></div>
+    </main>
+
+    <script>
+    let get_id = document.getElementById("lista-getId");
+    let get_producto = document.getElementById("getProduct-form");
+    let updateForm_container = document.getElementById("updateForm-container");
+
+    get_producto.addEventListener("submit", async(event) => {
+    event.preventDefault(); // Evitamos envio por defecto
+
+    try {
+       let formData = new FormData(event.target);
+       console.log(formData);
+
+       // Transformamos el objeto fromData en un objeto JS normal
+       let data = Object.fromEntries(formData.entries());
+       console.log(data);
+
+       let idProd = data.idProd.trim(); // Se sacan posibles espacios
+       console.log(idProd);
+
+       // Validación basica
+       if(!idProd) {
+        throw new Error("Ingrese un id de producto correcto");
+       }
+
+       let response = await fetch(`http://localhost:3000/products/${idProd}`); // Cambia 3000 por 3002
+
+       // Manejamos el error en una posible respuesta no exitosa
+       if(!response.ok){
+        throw new Error("Ingrese un id de producto correcto");
+       }
+
+       let datos = await response.json();
+       console.log(datos);
+
+       let producto = datos.payload;
+       
+       mostrarProducto(producto);
+
+       } catch (error){
+        console.log("Error al obtener el producto: ", error);
+        get_id.innerHTML = `${error.message}`;
+       }     
+    })
+
+    function mostrarProducto(producto) {
+        let getProductHtml = `
+       <li class="listado_mostrar">
+        <div class="li-datos">
+                <img src="${producto.image}" alt="">
+                <p>Nombre: ${producto.name} Precio: ${producto.price}</p>
+            </li>
+        </div>
+        <div class= "li-boton">
+            <input class = "listado-boton" id="updateProduct_button" type= "button" value= "Actualizar producto">
+        </div>    
+            `
+       get_id.innerHTML = getProductHtml;   
+
+       let updateProduct_button = document.getElementById("updateProduct_button")
+
+       updateProduct_button.addEventListener("click", function(event) {
+        formularioPutProducto(event, producto);
+       })
+    }
+
+    function formularioPutProducto(event, producto) {
+        event.stopPropagation();
+
+        console.table(producto);
+
+        let updateProduct = `
+        <div id="updateProducts-container" class="crudForm-container"></div>
+          <h2>Actualizar producto</h2>
+          <form id="updateProducts-form" autocomplete="off">
+            <label form= "idProd">Id</label>
+            <input type="number" name="id_producto" id="idProd" value= "${producto.id_producto}" readonly>
+
+            <label form= "categoryProd">Categoria</label>
+            <select name="category" id="categoryProd" required>
+                <option value="food">food</option>
+                <option value="drink">drink</option>
+            </select>
+
+            <label for="imageProd">Imagen</label>
+            <input type="text" name="image" id="imageProd" value="${producto.image}" required>
+
+            <label for="nombreProd">Nombre</label>
+            <input type="text" name="name" id="nombreProd" value="${producto.name}" required>
+
+            <label for="precioProd">Precio</label>
+            <input type="text" name="price" id="precioProd" value="${producto.price}" required>
+
+            <input type="submit" value="Enviar">
+          </form>
+        </div>
+        `;
+        updateForm_container.innerHTML = updateProduct;
+
+        let updateProducts_form = document.getElementById("updateProducts-form");
+
+        updateProducts_form.addEventListener("submit", function(event) {
+            actualizarProducto(event)
+        });
+
+        async function actualizarProducto(event) {
+            event.preventDefault();
+
+            let formData = new FormData(event.target);
+            let data = Object.fromEntries(formData.entries());
+
+            if(!data.name || !data.image || !data.price){
+                alert("Todos los campos son requeridos");
+                return;
+            }
+            try{
+                let response = await fetch(`http://localhost:3000/products/${data.id_producto}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if(response.ok) {
+                    console.log(response);
+                    let result =await response.json();
+                    console.log(result.message);
+                    alert(result.message);
+                    // Vaciamos si existiera la lista y el formulario de actu de producto
+                    get_id.innerHTML = "";
+                    updateForm_container.innerHTML = "";
+                } else {
+                    let error = await response.json();
+                    console.log("Error", error.message);
+                }
+            } catch(error){
+                alert("Error de conexión con el servidor");
+                console.error(error);
+            }
+        }
+    }
+    </script>
+<%-include("partials/footer") %>

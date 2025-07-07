@@ -1,0 +1,65 @@
+<%-include("partials/head") %>
+<%-include("partials/nav") %>
+    <h2><%= title %></h2>
+<%-include("partials/footer") %>
+
+<div id="alta-post" class="crudForm-container"></div>
+    <h2>Alta producto</h2>
+        <form id="altaProducts-form" autocomplete="off">
+            <select name="category" id="categoryProd" required>
+                <option value="food">food</option>
+                <option value="drink">drink</option>
+            </select>
+
+            <label for="imageProd">Imagen</label>
+            <input type="text" name="image" id="imageProd" required>
+
+            <label for="nombreProd">Nombre</label>
+            <input type="text" name="name" id="nombreProd" required>
+
+            <label for="precioProd">Precio</label>
+            <input type="text" name="price" id="precioProd" required>
+
+            <input type="submit" value="Enviar">
+        </form>
+</div>
+
+<script>
+        let altaProducts_form = document.getElementById("altaProducts-form");
+        altaProducts_form.addEventListener("submit", async (evento) => {
+            event.preventDefault();
+            //pasamos info a FormData:
+            let formData = new FormData(altaProducts_form);
+            console.log(formData);
+            
+            //pasamos info data a objeto json:
+            let data= Object.fromEntries(formData.entries());
+            console.log(data);
+            console.table(data);
+
+            if(!data.category || !data.image || !data.name || !data.price){
+                alert("Datos inválidos. Asegúrate de enviar los datos requeridos");
+                return;
+            }
+
+            try {
+                let response = await fetch("http://localhost:3000/products", { // Cambia 3000 por 3002
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+                if(response.ok){
+                    alert("Producto creado exitosamente");
+                    altaProducts_form.reset();
+                } else {
+                    alert("Error al crear el producto");
+                }
+            } catch (error) {
+                alert("Error de conexión con el servidor");
+                console.error(error);
+            }
+        });
+    </script>
+<%-include("partials/footer") %>

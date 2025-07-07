@@ -1,0 +1,70 @@
+<%-include("partials/head") %>
+<%-include("partials/nav") %>
+    <h2><%= title %></h2>
+<main id="contenedor-get">
+        <div>
+            <h2>Consultar producto</h2>
+            <form action="" id="getProduct-form">
+                <label for="idProd">Id producto</label>
+                <input type="number" name="idProd" id="idProd" placeholder="Escribe el id">
+                <input type="submit" value="Consultar">
+            </form>
+        </div>
+
+        <div id="getId-container">
+            <ul id="lista-getId"></ul>
+        </div>
+        <div id="getAll-container">
+            <h2>Todos los productos</h2>
+            <ul id="lista-productos"></ul>
+        </div>
+</main>
+
+<script>
+    let get_id = document.getElementById("lista-getId");
+    let get_producto = document.getElementById("getProduct-form");
+
+    get_producto.addEventListener("submit", async(event) => {
+    event.preventDefault(); // Evitamos envio por defecto
+
+    try {
+       let formData = new FormData(event.target);
+       console.log(formData);
+
+       // Transformamos el objeto fromData en un objeto JS normal
+       let data = Object.fromEntries(formData.entries());
+       console.log(data);
+
+       let idProd = data.idProd.trim(); // Se sacan posibles espacios
+       console.log(idProd);
+
+       // Validación basica
+       if(!idProd) {
+        throw new Error("Ingrese un id de producto correcto");
+       }
+       
+       let response = await fetch(`http://localhost:3000/products/${idProd}`); // Cambia 3000 por 3002
+
+       // Manejamos el error en una posible respuesta no exitosa
+       if(!response.ok){
+        throw new Error("Ingrese un id de producto correcto");
+       }
+       let datos = await response.json();
+       console.log(datos);
+
+       let producto = datos.payload;
+
+       let getProductHtml = `
+       <li class="listado_mostrar">
+                <img src="${producto.image}" alt="">
+                <p>Nombre: ${producto.name} Precio: ${producto.price}</p>
+            </li>
+            `
+       get_id.innerHTML = getProductHtml;     
+       } catch (error){
+        console.log("Error al obtener el producto: ", error);
+        get_id.innerHTML = `${error.message}`;
+       }     
+    })
+    </script>
+<%-include("partials/footer") %>
