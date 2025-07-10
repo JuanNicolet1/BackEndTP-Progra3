@@ -1,5 +1,5 @@
 import connection from "../database/db.js";
-import products from "../models/products.models.js";
+import products from "../models/products.models.js";  //traigo las consultas sql del products models.
 
 //get
 export const getAllProducts = async (req, res) => { // Obtener una lista de todos los productos.
